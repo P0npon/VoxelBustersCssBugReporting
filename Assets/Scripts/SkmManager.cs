@@ -13,13 +13,52 @@ public class SkmManager : NavigationParent
     WebView webview;
     string dataPath;
     string url;
+    bool send = false;
 
     public override Action<NavBarButton, bool> setEnableNavbarButton { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public void Awake()
     {
         dataPath = Path.Combine(Application.persistentDataPath, "SimpleHTMLWebsite");
+        WebView.DidFinishLoadEvent += OnFinishLoad;
+        WebView.DidFinishEvaluatingJavaScriptEvent += OnFinishEvaluatingJs;
+        WebView.DidReceiveMessageEvent += OnReceiveMessageEvent;
         StartCoroutine("TransferAndUnzip");
+    }
+
+    /// <summary>
+    /// When the webview finish to load we hide some elements then we show the webview
+    /// </summary>
+    /// <param name="webview"></param>
+    private void OnFinishLoad(WebView webview)
+    {
+        Debug.Log("I finish loading");
+        if(!send)
+        {
+            send = true;
+            webview.EvaluateJavaScriptFromString("document.getElementById(\"demo\").textContent;");
+        }
+    }
+    /// <summary>
+    /// For now this is just a Debug purpose callback
+    /// TODO Manage the pagination when voxel buster team debug this problem
+    /// </summary>
+    /// <param name="webview"></param>
+    /// <param name="message"></param>
+    private void OnReceiveMessageEvent(WebView webview, WebViewMessage message)
+    {
+        Debug.Log("New Webview message");
+    }
+
+    /// <summary>
+    /// For now this is just a Debug purpose callback
+    /// TODO Manage the pagination when voxel buster team resolve this problem
+    /// </summary>
+    /// <param name="webview"></param>
+    /// <param name="message"></param>
+    private void OnFinishEvaluatingJs(WebView webview, string message)
+    {
+        Debug.Log("Eval Js Finish " + message);
     }
 
     IEnumerator TransferAndUnzip()
